@@ -34,8 +34,8 @@ class Database extends mysqli
         $this->set_charset(DB_CHARSET);
 
         $this->memcache = new Memcached();
-        $this->memcache->addServer(MEMCACHE_HOST,MEMCACHE_PORT);
-//        $this->memcache->connect(MEMCACHE_HOST, MEMCACHE_PORT);
+        $this->memcache->addServer(MEMCACHE_HOST, MEMCACHE_PORT);
+        //        $this->memcache->connect(MEMCACHE_HOST, MEMCACHE_PORT);
     }
 
     /**
@@ -53,7 +53,7 @@ class Database extends mysqli
             $query = $this->query($sql);
             if ($query->num_rows) {
                 $result = $query->fetch_all(MYSQLI_ASSOC);
-                $this->memcache->set($key, $result, 0, $cachePeriod);
+                $this->memcache->set($key, $result, $cachePeriod);
             }
         }
 
