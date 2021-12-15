@@ -2,9 +2,9 @@ Pure PHP 8+, pure ES7, pure CSS3+
 
 Edit `.env-dev` and save as `.env`
 
-Parsing usage: `docker-compose exec app php index.php -k=CRON_KEY` use CRON_KEY constant from `config.php`
+Parsing usage: `docker-compose exec app php index.php -k=CRON_KEY` use CRON_KEY constant from `.env` file
 
-Build: `docker-compose up -d` then go to [http://127.0.0.1:8001][http://127.0.0.1:8001]
+Build: `docker-compose up -d` then go to [http://localhost:8001][http://127.0.0.1:8001]
 
 Web usage: https://word-art.boris-tim.site
 
