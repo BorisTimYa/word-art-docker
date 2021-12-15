@@ -35,7 +35,9 @@ trait ModelParser
             $loadId = $this->db->insert_id;
         }
 
-        $query = $this->db->query('Select id,url from film_types')->fetch_all(MYSQLI_ASSOC);
+        $query = $this->db->query('Select id,url from film_types')->fetch_all(
+            MYSQLI_ASSOC
+        );
         foreach ($query as $row) {
             yield $row['id'] => ['url' => $row['url'], 'loadId' => $loadId];
         }
@@ -44,14 +46,18 @@ trait ModelParser
     /**
      * @param $values
      *
-     * @return int|mixed
+     * @return int
      */
-    public function getFilmId($values)
+    public function getFilmId($values): int
     {
         $result = 0;
-        $query = $this->db->query('Select id from films where word_art_id = '.intval($values['word_art_id']));
+        $query = $this->db->query(
+            'Select id from films where word_art_id = ' . intval(
+                $values['word_art_id']
+            )
+        );
         if ($query->num_rows) {
-            $result = $query->fetch_assoc()['id'];
+            $result = intval($query->fetch_assoc()['id']);
         }
 
         return $result;
@@ -60,14 +66,23 @@ trait ModelParser
     /**
      * @param array $values
      *
-     * @return int|string
+     * @return int
      */
-    public function saveFilm(array $values)
+    public function saveFilm(array $values) : int
     {
         static $name, $year, $description, $cover, $word_art_id, $insertStmt;
         if (!isset($insertStmt)) {
-            $insertStmt = $this->db->prepare('Insert into films (name,year,description,cover,word_art_id)values(?,?,?,?,?)');
-            $insertStmt->bind_param('sissi', $name, $year, $description, $cover, $word_art_id);
+            $insertStmt = $this->db->prepare(
+                'Insert into films (name,year,description,cover,word_art_id)values(?,?,?,?,?)'
+            );
+            $insertStmt->bind_param(
+                'sissi',
+                $name,
+                $year,
+                $description,
+                $cover,
+                $word_art_id
+            );
         }
         extract($values);
         $insertStmt->execute();
@@ -78,20 +93,34 @@ trait ModelParser
     /**
      * @param array $values
      *
-     * @return int|string
+     * @return int
      * @throws Exception
      */
-    public function saveRate(array $values)
+    public function saveRate(array $values): int
     {
         static $load_id, $film_id, $film_type_id, $position, $calc_ball, $votes, $avg_ball, $insertStmt;
         if (!isset($insertStmt)) {
-            $insertStmt = $this->db->prepare('Insert into rates (load_id, film_id, film_type_id, position, calc_ball, votes, avg_ball) values (?,?,?,?,?,?,?)');
-            $insertStmt->bind_param('iiisdid', $load_id, $film_id, $film_type_id, $position, $calc_ball, $votes, $avg_ball);
+            $insertStmt = $this->db->prepare(
+                'Insert into rates (load_id, film_id, film_type_id, position, calc_ball, votes, avg_ball) values (?,?,?,?,?,?,?)'
+            );
+            $insertStmt->bind_param(
+                'iiisdid',
+                $load_id,
+                $film_id,
+                $film_type_id,
+                $position,
+                $calc_ball,
+                $votes,
+                $avg_ball
+            );
         }
         extract($values);
         $insertStmt->execute();
         if ($this->db->errno) {
-            throw new Exception(__CLASS__.' error: '.$this->db->error, $this->db->errno);
+            throw new Exception(
+                __CLASS__ . ' error: ' . $this->db->error,
+                $this->db->errno
+            );
         }
 
         return $this->db->insert_id;

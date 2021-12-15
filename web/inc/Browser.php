@@ -29,7 +29,7 @@ trait Browser
             }
             file_put_contents(
                 CACHE_PARSER_DIRECTORY . '.htaccess',
-                'Deny from all' . PHP_EOL . 'php_flag engine off' . PHP_EOL
+                "Deny from all\nphp_flag engine off" . PHP_EOL
             );
         }
     }
@@ -93,7 +93,7 @@ trait Browser
         } elseif (!isset($prev_url)) {
             $page_arr = range('a', 'z');
             shuffle($page_arr);
-            $prev_url = 'http://' . implode(
+            $prev_url = 'ht' . 'tp://' . implode(
                     '',
                     array_slice(
                         $page_arr,
@@ -165,9 +165,9 @@ trait Browser
     /**
      * @param $zipped
      *
-     * @return false|string
+     * @return bool|string
      */
-    private function gunzip($zipped)
+    private function gunzip($zipped): string|bool
     {
         $offset = 0;
         if (substr($zipped, 0, 2) == "\x1f\x8b") {

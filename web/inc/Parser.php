@@ -16,7 +16,13 @@ class Parser
     use ModelParser;
     use Browser;
 
-    const TOP_10_FIELDS = ['position', 'name', 'calc_ball', 'votes', 'avg_ball'];
+    const TOP_10_FIELDS = [
+        'position',
+        'name',
+        'calc_ball',
+        'votes',
+        'avg_ball',
+    ];
 
     /**
      * Parser constructor.
@@ -29,23 +35,42 @@ class Parser
             $this->initBrowser();
             $this->initDatabase();
         } catch (Exception $exception) {
-            throw new Exception(sprintf('Parser error: %s', $exception->getMessage()), $exception->getCode(), $exception);
+            throw new Exception(
+                sprintf('Parser error: %s', $exception->getMessage()),
+                $exception->getCode(),
+                $exception
+            );
         }
         if (!is_dir(IMAGE_DIRECTORY)) {
             if (!is_dir(IMAGE_DIRECTORY)) {
-                _log('Creating images directory '.IMAGE_DIRECTORY);
+                _log('Creating images directory ' . IMAGE_DIRECTORY);
                 if (!mkdir(IMAGE_DIRECTORY)) {
-                    throw new Exception(sprintf('Parser error: Unable to create images directory %s', IMAGE_DIRECTORY));
+                    throw new Exception(
+                        sprintf(
+                            'Parser error: Unable to create images directory %s',
+                            IMAGE_DIRECTORY
+                        )
+                    );
                 }
-                file_put_contents(CACHE_PARSER_DIRECTORY.'.htaccess', 'Order Allow, Deny\nphp_flag engine off'.PHP_EOL);
+                file_put_contents(
+                    CACHE_PARSER_DIRECTORY . '.htaccess',
+                    "Order Allow, Deny\nphp_flag engine off" . PHP_EOL
+                );
             }
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function parse()
     {
         foreach ($this->newLoad() as $filmTypeId => $row) {
-            $this->parseTopFilms(sprintf($row['url'], PARSER_ITEMS_PER_QUERY), $row['loadId'], $filmTypeId);
+            $this->parseTopFilms(
+                sprintf($row['url'], PARSER_ITEMS_PER_QUERY),
+                $row['loadId'],
+                $filmTypeId
+            );
         }
     }
 
@@ -61,7 +86,11 @@ class Parser
         $page = $this->getPage($url, false);
         $fieldNo = 0;
 
-        if (preg_match_all('/<td bgcolor=#D7D7D7.*?>(.*?)<\/td>/', $page, $matches)) {
+        if (preg_match_all(
+            '/<td bgcolor=#D7D7D7.*?>(.*?)<\/td>/',
+            $page,
+            $matches
+        )) {
             foreach ($matches[1] as $npp => $match) {
                 $item[self::TOP_10_FIELDS[$fieldNo++]] = $match;
                 if (($npp + 1) % 5 === 0) {
@@ -69,15 +98,23 @@ class Parser
                     if (preg_match('/\[(\d{4}?)]/', $item['name'], $match)) {
                         $item['year'] = $match[1];
                     }
-                    if (preg_match('/cinema\.php\?id=(\d+)/', $item['name'], $matches)) {
+                    if (preg_match(
+                        '/cinema\.php\?id=(\d+)/',
+                        $item['name'],
+                        $matches
+                    )) {
                         $item['word_art_id'] = $matches[1];
                     }
-                    $item['name'] = preg_replace('/\[(\d{4}?)]/', '', $item['name']);
+                    $item['name'] = preg_replace(
+                        '/\[(\d{4}?)]/',
+                        '',
+                        $item['name']
+                    );
                     $item = array_map(
-                      function ($value) {
-                          return trim(strip_tags($value));
-                      },
-                      $item
+                        function ($value) {
+                            return trim(strip_tags($value));
+                        },
+                        $item
                     );
                     if (!$item['film_id'] = $this->getFilmId($item)) {
                         $this->parseFilm($item);
@@ -85,27 +122,31 @@ class Parser
                     }
                     $item['load_id'] = $loadId;
                     $item['film_type_id'] = $filmTypeId;
+                    $rateId = -1;
                     try {
                         $rateId = $this->saveRate($item);
                     } catch (Exception $exception) {
-                        _log('Error saving film? db error: '.$exception->getCode());
+                        _log(
+                            'Error saving film db error: ' . $exception->getCode(
+                            )
+                        );
                     }
-                    _log('Saved rate id: '.$rateId);
+                    _log('Saved rate id: ' . $rateId);
                 }
             }
         }
     }
 
     /**
-     * @param $url
+     * @param string $url
      *
-     * @return string|string[]
+     * @return string
      */
-    private function fetchImage($url)
+    private function fetchImage(string $url):string
     {
         $cacheFile = $this->getPage($url, true);
         $imgFile = pathinfo($cacheFile, PATHINFO_BASENAME);
-        copy($cacheFile, IMAGE_DIRECTORY.$imgFile);
+        copy($cacheFile, IMAGE_DIRECTORY . $imgFile);
 
         return $imgFile;
     }
@@ -115,16 +156,24 @@ class Parser
      */
     private function parseFilm(array &$item)
     {
-        _log('Parsing film: '.$item['word_art_id']);
-        $page = $this->getPage(sprintf(PARSER_FILM_URL, $item['word_art_id']), false);
-        if (preg_match('/<p align=justify class=\'review\'>(.*?)<\/p>/', $page, $matches)) {
+        _log('Parsing film: ' . $item['word_art_id']);
+        $page = $this->getPage(
+            sprintf(PARSER_FILM_URL, $item['word_art_id']),
+            false
+        );
+        if (preg_match(
+            '/<p align=justify class=\'review\'>(.*?)<\/p>/',
+            $page,
+            $matches
+        )) {
             $item['description'] = $matches[1];
         }
-        if (preg_match('/<img src=\'(img\/\d+\/'.$item['word_art_id'].'\/\d+.jpg)\' width=300 border=1 alt=/', $page, $matches)) {
+        if (preg_match(
+            '/<img src=\'(img\/\d+\/' . $item['word_art_id'] . '\/\d+.jpg)\' width=300 border=1 alt=/',
+            $page,
+            $matches
+        )) {
             $item['cover'] = $this->fetchImage($matches[1]);
         }
-        //        _log('Parsing history info for film: '.$item['word_art_id']);
-        //        $page = $this->getPage(sprintf(PARSER_FILM_HISTORY, $item['word_art_id']), false);
     }
-
 }

@@ -3,8 +3,8 @@
 
 namespace Db;
 
+use Memcached;
 use mysqli;
-use Memcache;
 use Exception;
 
 /**
@@ -16,9 +16,9 @@ class Database extends mysqli
 {
 
     /**
-     * @var Memcache
+     * @var Memcached
      */
-    private \Memcached $memcache;
+    private Memcached $memcache;
 
     /**
      * Database constructor.
@@ -33,7 +33,7 @@ class Database extends mysqli
         }
         $this->set_charset(DB_CHARSET);
 
-        $this->memcache = new \Memcached();
+        $this->memcache = new Memcached();
         $this->memcache->addServer(MEMCACHE_HOST,MEMCACHE_PORT);
 //        $this->memcache->connect(MEMCACHE_HOST, MEMCACHE_PORT);
     }
