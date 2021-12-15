@@ -1,0 +1,9 @@
+<Files "config.inc">
+Order Allow,Deny
+Deny from all
+</Files>
+<IfModule mod_headers.c>
+<FilesMatch ".(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf)$">
+  Header set Cache-Control "max-age=2592000"
+</FilesMatch>
+</IfModule>

@@ -1,0 +1,5 @@
+.idea
+.env
+cache
+log.log
+config.inc

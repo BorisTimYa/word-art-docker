@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  database:
+    container_name: ${PROJECT_NAME}-mysql
+    image: mysql:8.0.27
+    restart: unless-stopped
+    environment:
+      TZ: ${TIMEZONE}
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+    ports:
+      - $MYSQL_PORT:3306
+    networks:
+      - internal
+      - external
+    volumes:
+      - ./db_data:/var/lib/mysql:rw
+
+  app:
+    container_name: ${PROJECT_NAME}-app
+    build:
+      context: ./docker/
+      dockerfile: app.Dockerfile
+      shm_size: '512mb'
+    restart: unless-stopped
+    environment:
+      TZ: ${TIMEZONE}
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+      PROJECT_NAME: $PROJECT_NAME
+    volumes:
+      - ./etc/php/conf.d:/usr/local/etc/php/conf.d
+      - ./web:/var/www/html:rw
+    depends_on:
+      - database
+      - memcache
+    networks:
+      - internal
+
+  memcache:
+    container_name: ${PROJECT_NAME}-memcache
+    image: memcached:1.6.12
+    ports:
+      - 11211:11211
+    networks:
+      - internal
+
+  webserver:
+    container_name: ${PROJECT_NAME}-nginx
+    image: nginx:1.21.3
+    depends_on:
+      - app
+    restart: unless-stopped
+    ports:
+      - $WEB_PORT:80
+    volumes:
+      - ./web:/var/www/html:rw
+      - ./etc/nginx:/etc/nginx/conf.d
+    networks:
+      - external
+      - internal
+networks:
+  external:
+    driver: bridge
+  internal:
+    driver: bridge
