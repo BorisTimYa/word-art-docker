@@ -1,7 +1,6 @@
 .idea
-#.env
+.env
 cache/
 log.log
 config.inc
 images/
-#db_data
