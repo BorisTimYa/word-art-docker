@@ -1,6 +1,5 @@
 .idea
-.env
+#.env
 cache/
 log.log
-config.inc
-images/
+#images/
