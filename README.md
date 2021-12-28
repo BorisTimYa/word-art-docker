@@ -2,9 +2,10 @@ Pure PHP 8+, pure ES7, pure CSS3+
 
 Build: `docker-compose up -d`
 
+Web usage: http://localhost:WEB_PORT where WEB_PORT from `.env`
+
 Parsing usage: `docker-compose exec app php -f index.php CRON_KEY` use CRON_KEY constant from `.env` file
 
-Web usage: http://localhost:WEB_PORT where WEB_PORT from `.env`
 
 Requires: PHP8+, ECMA7+, CSS3+, Docker    
 Depends on: mysqli, curl, zlib, memcache
