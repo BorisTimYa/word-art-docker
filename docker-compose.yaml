@@ -24,7 +24,7 @@ services:
     build:
       context: ./docker/
       dockerfile: app.Dockerfile
-      shm_size: '512mb'
+
     restart: unless-stopped
     environment:
       TZ: ${TIMEZONE}
@@ -33,6 +33,7 @@ services:
       MYSQL_USER: $MYSQL_USER
       MYSQL_PASSWORD: $MYSQL_PASSWORD
       PROJECT_NAME: $PROJECT_NAME
+      CRON_KEY: $CRON_KEY
     volumes:
       - ./etc/php/conf.d:/usr/local/etc/php/conf.d
       - ./web:/var/www/html:rw

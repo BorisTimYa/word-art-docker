@@ -4,7 +4,7 @@ require_once 'config.inc';
 require_once 'inc/functions.inc';
 require_once 'inc/Database.php';
 
-if ((php_sapi_name() === 'cli') && isset($argv[1]) && ($argv[1] === CRON_KEY)) {
+if ((php_sapi_name() === 'cli') && (($argv[1] ?? '111') == CRON_KEY)) {
     _log('Start parsing', 1);
     require_once 'inc/ModelParser.php';
     require_once 'inc/Browser.php';
